@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRangePickerOptions';
 
@@ -8,7 +9,8 @@ import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRang
 })
 export class AppComponent implements OnInit {
     public value: string;
-    public options: NgDateRangePickerOptions;
+    public options: Partial<NgDateRangePickerOptions>;
+    public control = new FormControl('');
 
     public ngOnInit(): void {
         this.options = {
@@ -25,7 +27,7 @@ export class AppComponent implements OnInit {
                 'Start',
                 'End',
             ],
-            dateFormat: 'yMd',
+            dateFormat: 'y-MM-dd',
             outputFormat: 'DD/MM/YYYY',
             startOfWeek: 0,
         };

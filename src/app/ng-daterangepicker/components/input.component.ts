@@ -1,10 +1,11 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {NgDateRangePickerOptions} from '../models/NgDateRangePickerOptions';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+
+import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 
 @Component({
-    selector: 'ng-datepicker-component',
+    selector: 'ng-datepicker-input',
     template: `
-        <div class="input-section" (click)="toggleCalendar($event, 'from')">
+        <div class="input-section" (click)="clickInput.emit()">
             <span class="label-txt">{{ options.presetNames[6] }}</span>
             <span class="value-txt">{{ date | date:options.dateFormat }}</span>
             <span class="cal-icon">
@@ -22,4 +23,5 @@ import {NgDateRangePickerOptions} from '../models/NgDateRangePickerOptions';
 export class InputComponent {
     @Input() public options: NgDateRangePickerOptions;
     @Input() public date: Date;
+    @Output() public clickInput = new EventEmitter();
 }

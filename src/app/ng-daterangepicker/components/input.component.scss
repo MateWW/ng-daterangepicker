@@ -1,0 +1,48 @@
+@import "colors";
+
+.input-section {
+  width: calc(100% / 2);
+  height: 50px;
+  display: block;
+  float: left;
+  outline: none;
+  padding: 7px 10px;
+  color: $text;
+  cursor: pointer;
+  position: relative;
+
+  &:first-child {
+    border-right: 1px solid $border-light;
+  }
+}
+
+.label-txt, .value-txt {
+  display: block;
+}
+
+.label-txt {
+  color: $blue;
+  font-size: 11px;
+}
+
+.value-txt {
+  color: $text;
+  font-size: 13px;
+  border-bottom: 1px solid transparent;
+}
+
+.cal-icon {
+  position: absolute;
+  display: block;
+  right: 10px;
+  bottom: 5px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+
+    path {
+      fill: $blue-icon;
+    }
+  }
+}
