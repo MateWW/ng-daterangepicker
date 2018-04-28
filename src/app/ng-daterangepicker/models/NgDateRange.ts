@@ -4,9 +4,11 @@ export interface NgDateRange {
 }
 
 export function updateDateRange(range: NgDateRange, { from, to }: Partial<NgDateRange>): NgDateRange {
+    const currentFrom = from || range.from;
+    const currentTo = to || range.to;
     return {
-        from: from || range.from,
-        to: to || range.to,
+        from: currentFrom.getTime() > currentTo.getTime() ? currentTo : currentFrom,
+        to: currentTo.getTime() < currentFrom.getTime() ? currentFrom : currentTo,
     };
 }
 

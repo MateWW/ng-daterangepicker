@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import * as dateFns from 'date-fns';
-import { IDay } from '../models/IDay';
+
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CalendarData } from '../models/CalendarData';
+import { createDateRange, NgDateRange } from '../models/NgDateRange';
 import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 
 @Component({
@@ -18,7 +21,7 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
                             <path d="M11.7062895,64 C11.6273879,64 11.5477012,63.9744846 11.480576,63.921491 L0.139160349,54.9910879 C0.0551556781,54.9247477 0.00451734852,54.8250413 0.000199351429,54.7174839 C-0.00333355528,54.6107116 0.0402389608,54.5074722 0.119140544,54.4356364 L11.4605562,44.095211 C11.6093308,43.9589979 11.8401474,43.9707742 11.9751829,44.1187637 C12.1110036,44.2675384 12.1004048,44.4983549 11.9516302,44.6333905 L0.928176181,54.6841175 L11.9323955,63.3491601 C12.0905912,63.4735969 12.1176768,63.7028433 11.9928475,63.861039 C11.9206191,63.9521095 11.8138469,64 11.7062895,64 Z" id="Shape" stroke="none" fill="#000000" fill-rule="nonzero"></path>
                           </svg>
                         </span>
-                    <span class="control-title">{{ date | date:'MMMM y' }}</span>
+                    <span class="control-title">{{ calendar.month | date:'MMMM y' }}</span>
                     <span class="control-icon" (click)="nextMonth()">
                           <svg width="13px" height="20px" viewBox="21 44 13 20">
                             <path d="M32.7062895,64 C32.6273879,64 32.5477012,63.9744846 32.480576,63.921491 L21.1391603,54.9910879 C21.0551557,54.9247477 21.0045173,54.8250413 21.0001994,54.7174839 C20.9966664,54.6107116 21.040239,54.5074722 21.1191405,54.4356364 L32.4605562,44.095211 C32.6093308,43.9589979 32.8401474,43.9707742 32.9751829,44.1187637 C33.1110036,44.2675384 33.1004048,44.4983549 32.9516302,44.6333905 L21.9281762,54.6841175 L32.9323955,63.3491601 C33.0905912,63.4735969 33.1176768,63.7028433 32.9928475,63.861039 C32.9206191,63.9521095 32.8138469,64 32.7062895,64 Z" id="Shape" stroke="none" fill="#000000" fill-rule="nonzero" transform="translate(27.035642, 54.000000) scale(-1, 1) translate(-27.035642, -54.000000) "></path>
@@ -26,11 +29,11 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
                         </span>
                 </div>
                 <div class="day-names">
-                    <span class="day-name" *ngFor="let name of dayNames">{{ name }}</span>
+                    <span class="day-name" *ngFor="let name of options.dayNames">{{ name }}</span>
                 </div>
                 <div class="days">
                     <div class="day"
-                         *ngFor="let d of days; let i = index;"
+                         *ngFor="let d of calendar.days; let i = index;"
                          [ngClass]="{
                                    'is-within-range': d.isWithinRange,
                                    'is-from': d.from,
@@ -38,7 +41,7 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
                                    'is-first-weekday': d.weekday === 1 || d.firstMonthDay,
                                    'is-last-weekday': d.weekday === 0 || d.lastMonthDay
                                 }"
-                         (click)="selectDate($event, i)"
+                         (click)="selectRange(d.date)"
                     >
                         <span *ngIf="d.visible" class="day-num" [class.is-active]="d.from || d.to">{{ d.day }}</span>
                     </div>
@@ -46,12 +49,12 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
             </div>
             <div class="side-container">
                 <div class="side-container-buttons">
-                    <button type="button" class="side-button" (click)="selectRange('tm')" [class.is-active]="range === 'tm'">{{options.presetNames[0]}}</button>
-                    <button type="button" class="side-button" (click)="selectRange('lm')" [class.is-active]="range === 'lm'">{{options.presetNames[1]}}</button>
-                    <button type="button" class="side-button" (click)="selectRange('tw')" [class.is-active]="range === 'tw'">{{options.presetNames[2]}}</button>
-                    <button type="button" class="side-button" (click)="selectRange('lw')" [class.is-active]="range === 'lw'">{{options.presetNames[3]}}</button>
-                    <button type="button" class="side-button" (click)="selectRange('ty')" [class.is-active]="range === 'ty'">{{options.presetNames[4]}}</button>
-                    <button type="button" class="side-button" (click)="selectRange('ly')" [class.is-active]="range === 'ly'">{{options.presetNames[5]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('tm')" [class.is-active]="(range$ | async) === 'tm'">{{options.presetNames[0]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('lm')" [class.is-active]="(range$ | async) === 'lm'">{{options.presetNames[1]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('tw')" [class.is-active]="(range$ | async) === 'tw'">{{options.presetNames[2]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('lw')" [class.is-active]="(range$ | async) === 'lw'">{{options.presetNames[3]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('ty')" [class.is-active]="(range$ | async) === 'ty'">{{options.presetNames[4]}}</button>
+                    <button type="button" class="side-button" (click)="selectDefaultRange('ly')" [class.is-active]="(range$ | async) === 'ly'">{{options.presetNames[5]}}</button>
                 </div>
                 <span class="close-icon" (click)="close.emit()">
                         <svg width="20px" height="20px" viewBox="47 44 20 20" version="1.1">
@@ -70,140 +73,62 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 export class CalendarComponent {
     @Input() public options: NgDateRangePickerOptions;
     @Input() public opened: null | 'from' | 'to';
+    @Input() public calendar: CalendarData;
     @Output() public close = new EventEmitter();
+    @Output() public changeMonth = new EventEmitter<Date>();
+    @Output() public changeRange = new EventEmitter<Partial<NgDateRange>>();
 
-    public modelValue: string;
-    public date: Date;
-    public dateFrom: Date;
-    public dateTo: Date;
-    public dayNames: string[];
-    public days: IDay[];
-    public range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly';
-
-    public get value(): string {
-        return this.modelValue;
-    }
-
-    public set value(value: string) {
-        if (!value) {
-            return;
-        }
-        this.modelValue = value;
-    }
-
-    public generateCalendar(): void {
-        this.days = [];
-        const start: Date = dateFns.startOfMonth(this.date);
-        const end: Date = dateFns.endOfMonth(this.date);
-
-        const days: IDay[] = dateFns.eachDay(start, end).map(d => {
-            return {
-                date: d,
-                day: dateFns.getDate(d),
-                weekday: dateFns.getDay(d),
-                today: dateFns.isToday(d),
-                firstMonthDay: dateFns.isFirstDayOfMonth(d),
-                lastMonthDay: dateFns.isLastDayOfMonth(d),
-                visible: true,
-                from: dateFns.isSameDay(this.dateFrom, d),
-                to: dateFns.isSameDay(this.dateTo, d),
-                isWithinRange: dateFns.isWithinRange(d, this.dateFrom, this.dateTo),
-            };
-        });
-
-        const prevMonthDayNum = dateFns.getDay(start) === 0 ? 6 : dateFns.getDay(start) - 1;
-        let prevMonthDays: IDay[] = [];
-        if (prevMonthDayNum > 0) {
-            prevMonthDays = Array.from(Array(prevMonthDayNum).keys()).map(i => {
-                const d = dateFns.subDays(start, prevMonthDayNum - i);
-                return {
-                    date: d,
-                    day: dateFns.getDate(d),
-                    weekday: dateFns.getDay(d),
-                    firstMonthDay: dateFns.isFirstDayOfMonth(d),
-                    lastMonthDay: dateFns.isLastDayOfMonth(d),
-                    today: false,
-                    visible: false,
-                    from: false,
-                    to: false,
-                    isWithinRange: false,
-                };
-            });
-        }
-
-        this.days = prevMonthDays.concat(days);
-        this.value = `${dateFns.format(this.dateFrom, this.options.outputFormat)}-${dateFns.format(
-            this.dateTo,
-            this.options.outputFormat,
-        )}`;
-    }
-
-    public selectDate(e: MouseEvent, index: number): void {
-        e.preventDefault();
-        const selectedDate: Date = this.days[index].date;
-        if (
-            (this.opened === 'from' && dateFns.isAfter(selectedDate, this.dateTo)) ||
-            (this.opened === 'to' && dateFns.isBefore(selectedDate, this.dateFrom))
-        ) {
-            return;
-        }
-
-        if (this.opened === 'from') {
-            this.dateFrom = selectedDate;
-            this.opened = 'to';
-        } else if (this.opened === 'to') {
-            this.dateTo = selectedDate;
-            this.opened = 'from';
-        }
-
-        this.generateCalendar();
-    }
+    public range$ = new BehaviorSubject<'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly' | null>(null);
 
     public prevMonth(): void {
-        this.date = dateFns.subMonths(this.date, 1);
-        this.generateCalendar();
+        this.changeMonth.emit(this.calendar.prevMonth);
     }
 
     public nextMonth(): void {
-        this.date = dateFns.addMonths(this.date, 1);
-        this.generateCalendar();
+        this.changeMonth.emit(this.calendar.nextMonth);
     }
 
-    public selectRange(range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly'): void {
-        let today = dateFns.startOfDay(new Date());
+    public selectRange(date: Date): void {
+        if (this.opened) {
+            this.changeRange.emit({
+                [this.opened]: date,
+            });
+            this.range$.next(null);
+        }
+    }
+
+    public selectDefaultRange(range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly'): void {
+        const today = new Date();
+        this.changeMonth.emit(today);
+        this.range$.next(range);
 
         switch (range) {
             case 'tm':
-                this.dateFrom = dateFns.startOfMonth(today);
-                this.dateTo = dateFns.endOfMonth(today);
-                break;
-            case 'lm':
-                today = dateFns.subMonths(today, 1);
-                this.dateFrom = dateFns.startOfMonth(today);
-                this.dateTo = dateFns.endOfMonth(today);
-                break;
-            case 'lw':
-                today = dateFns.subWeeks(today, 1);
-                this.dateFrom = dateFns.startOfWeek(today, { weekStartsOn: this.options.startOfWeek });
-                this.dateTo = dateFns.endOfWeek(today, { weekStartsOn: this.options.startOfWeek });
-                break;
-            case 'tw':
-                this.dateFrom = dateFns.startOfWeek(today, { weekStartsOn: this.options.startOfWeek });
-                this.dateTo = dateFns.endOfWeek(today, { weekStartsOn: this.options.startOfWeek });
-                break;
-            case 'ty':
-                this.dateFrom = dateFns.startOfYear(today);
-                this.dateTo = dateFns.endOfYear(today);
-                break;
-            default:
-                // case 'ly'
-                today = dateFns.subYears(today, 1);
-                this.dateFrom = dateFns.startOfYear(today);
-                this.dateTo = dateFns.endOfYear(today);
-                break;
-        }
+                return this.changeRange.emit(createDateRange(dateFns.startOfMonth(today), dateFns.endOfMonth(today)));
 
-        this.range = range;
-        this.generateCalendar();
+            case 'lm':
+                const prevMonth = dateFns.subMonths(today, 1);
+                return this.changeRange.emit(
+                    createDateRange(dateFns.startOfMonth(prevMonth), dateFns.endOfMonth(prevMonth)),
+                );
+
+            case 'lw':
+                const prevWeek = dateFns.subWeeks(today, 1);
+                return this.changeRange.emit(
+                    createDateRange(dateFns.startOfWeek(prevWeek), dateFns.endOfWeek(prevWeek)),
+                );
+
+            case 'tw':
+                return this.changeRange.emit(createDateRange(dateFns.startOfWeek(today), dateFns.endOfWeek(today)));
+
+            case 'ty':
+                return this.changeRange.emit(createDateRange(dateFns.startOfYear(today), dateFns.endOfYear(today)));
+
+            default:
+                const lastYear = dateFns.subYears(today, 1);
+                return this.changeRange.emit(
+                    createDateRange(dateFns.startOfYear(lastYear), dateFns.endOfYear(lastYear)),
+                );
+        }
     }
 }

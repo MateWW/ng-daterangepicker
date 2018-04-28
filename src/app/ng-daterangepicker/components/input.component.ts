@@ -6,7 +6,7 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     selector: 'ng-datepicker-input',
     template: `
         <div class="input-section" (click)="clickInput.emit()">
-            <span class="label-txt">{{ options.presetNames[6] }}</span>
+            <span class="label-txt">{{ options.inputNames[titleKey] }}</span>
             <span class="value-txt">{{ date | date:options.dateFormat }}</span>
             <span class="cal-icon">
               <svg width="94px" height="94px" viewBox="3 3 94 94" version="1.1">
@@ -23,5 +23,6 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 export class InputComponent {
     @Input() public options: NgDateRangePickerOptions;
     @Input() public date: Date;
+    @Input() public titleKey: string;
     @Output() public clickInput = new EventEmitter();
 }

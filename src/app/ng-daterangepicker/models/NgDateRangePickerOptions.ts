@@ -5,6 +5,10 @@ export interface NgDateRangePickerOptions {
     range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly';
     dayNames: string[];
     presetNames: string[];
+    inputNames: {
+        from: string;
+        to: string;
+    };
     dateFormat: string;
     outputFormat: string;
     startOfWeek: number;
@@ -15,7 +19,11 @@ export const defaultOptions: NgDateRangePickerOptions = {
     theme: 'default',
     range: 'tm',
     dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    presetNames: ['This Month', 'Last Month', 'This Week', 'Last Week', 'This Year', 'Last Year', 'Start', 'End'],
+    presetNames: ['This Month', 'Last Month', 'This Week', 'Last Week', 'This Year', 'Last Year'],
+    inputNames: {
+        from: 'Start',
+        to: 'End',
+    },
     dateFormat: 'y-M-d',
     outputFormat: 'DD/MM/YYYY',
     startOfWeek: 0,
@@ -26,5 +34,9 @@ export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): NgD
     return {
         ...defaultOptions,
         ...partial,
+        inputNames: {
+            ...defaultOptions.inputNames,
+            ...(partial.inputNames ? partial.inputNames : {}),
+        },
     };
 }
