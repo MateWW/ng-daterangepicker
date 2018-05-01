@@ -9,6 +9,7 @@ export interface NgDateRangePickerOptions {
         from: string;
         to: string;
     };
+    alignment: 'left' | 'center' | 'right';
     dateFormat: string;
     outputFormat: string;
     startOfWeek: number;
@@ -24,6 +25,7 @@ export const defaultOptions: NgDateRangePickerOptions = {
         from: 'Start',
         to: 'End',
     },
+    alignment: 'left',
     dateFormat: 'y-M-d',
     outputFormat: 'DD/MM/YYYY',
     startOfWeek: 0,

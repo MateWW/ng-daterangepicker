@@ -27,6 +27,7 @@ export class AppComponent implements OnInit {
                 'Start',
                 'End',
             ],
+            alignment: 'right',
             dateFormat: 'y-MM-dd',
             outputFormat: 'DD/MM/YYYY',
             startOfWeek: 1,

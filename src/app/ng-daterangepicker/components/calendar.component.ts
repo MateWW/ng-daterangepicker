@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import * as dateFns from 'date-fns';
-
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
 import { CalendarData } from '../models/CalendarData';
 import { createDateRange, NgDateRange } from '../models/NgDateRange';
 import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
@@ -12,7 +12,9 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
         <div class="calendar"
              [ngClass]="{
                     'is-opened': opened,
-                    'is-to': opened === 'to'
+                    'is-to': opened === 'to',
+                    'alignment-center': options.alignment === 'center',
+                    'alignment-right': options.alignment === 'right'
                 }">
             <div class="calendar-container">
                 <div class="controls">
