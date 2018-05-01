@@ -16,7 +16,7 @@ import {
 } from 'date-fns';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { mergeMap } from 'rxjs/operators';
+import { distinctUntilChanged, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { CalendarData } from '../models/CalendarData';
 import { IDay } from '../models/IDay';
@@ -29,7 +29,11 @@ export class NgDaterangepickerService {
     private selectedRange$ = new BehaviorSubject<NgDateRange>(this.options$.getValue().initialDateRange);
     private currentCalendarMonth$ = new BehaviorSubject<Date>(new Date());
     private calendar$ = this.currentCalendarMonth$.pipe(
-        mergeMap(() => this.selectedRange$, date => this.generateCalendar(date)),
+        mergeMap(
+            () => this.selectedRange$.pipe(distinctUntilChanged()),
+            (date, range) => this.generateCalendar(date, range),
+        ),
+        shareReplay(1),
     );
 
     public getDateRange(): Observable<NgDateRange> {
@@ -56,21 +60,21 @@ export class NgDaterangepickerService {
         return this.calendar$;
     }
 
-    private generateCalendar(month: Date): CalendarData {
+    private generateCalendar(month: Date, range: NgDateRange): CalendarData {
         return {
             prevMonth: subMonths(month, 1),
             month,
             nextMonth: addMonths(month, 1),
-            days: this.generateCalendarDays(month),
+            days: this.generateCalendarDays(month, range),
         };
     }
 
-    private generateCalendarDays(month: Date): IDay[] {
+    private generateCalendarDays(month: Date, range: NgDateRange): IDay[] {
         const monthStart = startOfMonth(month);
-        const start = startOfWeek(monthStart);
+        const start = startOfWeek(monthStart, { weekStartsOn: this.options$.getValue().startOfWeek });
         const end = addDays(start, 6 * 7 - 1);
-        const { from, to } = this.selectedRange$.getValue();
-        return eachDay(start, end).map(date => {
+        const { from, to } = range;
+        return eachDay(start, end).map(date => {;
             return {
                 date,
                 day: getDate(date),

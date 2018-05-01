@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
             ],
             dateFormat: 'y-MM-dd',
             outputFormat: 'DD/MM/YYYY',
-            startOfWeek: 0,
+            startOfWeek: 1,
         };
     }
 }

@@ -1,3 +1,5 @@
+import { endOfDay, startOfDay } from 'date-fns';
+
 export interface NgDateRange {
     from: Date;
     to: Date;
@@ -7,8 +9,8 @@ export function updateDateRange(range: NgDateRange, { from, to }: Partial<NgDate
     const currentFrom = from || range.from;
     const currentTo = to || range.to;
     return {
-        from: currentFrom.getTime() > currentTo.getTime() ? currentTo : currentFrom,
-        to: currentTo.getTime() < currentFrom.getTime() ? currentFrom : currentTo,
+        from: startOfDay(currentFrom.getTime() > currentTo.getTime() ? currentTo : currentFrom),
+        to: endOfDay(currentTo.getTime() < currentFrom.getTime() ? currentFrom : currentTo),
     };
 }
 

@@ -38,8 +38,8 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
                                    'is-within-range': d.isWithinRange,
                                    'is-from': d.from,
                                    'is-to': d.to,
-                                   'is-first-weekday': d.weekday === 1 || d.firstMonthDay,
-                                   'is-last-weekday': d.weekday === 0 || d.lastMonthDay
+                                   'is-first-weekday': d.weekday === 1,
+                                   'is-last-weekday': d.weekday === 0
                                 }"
                          (click)="selectRange(d.date)"
                     >
