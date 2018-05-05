@@ -115,7 +115,7 @@
     width: 14.2%;
     font-size: 13px;
     font-weight: bold;
-    color: $grey;
+    color: $dark;
     text-align: center;
     cursor: pointer;
 
@@ -126,11 +126,6 @@
       padding-bottom: 100%;
     }
 
-    &.is-within-range {
-      background: $blue-light;
-      color: $dark;
-    }
-
     &.is-from {
       border-top-left-radius: 50%;
       border-bottom-left-radius: 50%;
@@ -139,6 +134,24 @@
     &.is-to {
       border-top-right-radius: 50%;
       border-bottom-right-radius: 50%;
+    }
+
+    &.is-not-current-month {
+      color: $grey;
+
+      .day-num:hover {
+        background: $grey-light;
+      }
+    }
+
+    &.is-within-range {
+      background: $blue-light;
+      color: $dark;
+
+      .day-num:hover {
+        background: $blue;
+        color: $white;
+      }
     }
 
     .day-num {

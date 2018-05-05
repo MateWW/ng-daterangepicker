@@ -5,9 +5,8 @@ import {
     eachDay,
     getDate,
     getDay,
-    isFirstDayOfMonth,
-    isLastDayOfMonth,
     isSameDay,
+    isSameMonth,
     isToday,
     isWithinRange,
     startOfMonth,
@@ -19,12 +18,13 @@ import { Observable } from 'rxjs/Observable';
 import { distinctUntilChanged, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { CalendarData } from '../models/CalendarData';
-import { IDay } from '../models/IDay';
+import { Day } from '../models/Day';
 import { NgDateRange, updateDateRange } from '../models/NgDateRange';
 import { getOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 
 @Injectable()
 export class NgDaterangepickerService {
+    private opened$ = new BehaviorSubject<null | 'from' | 'to'>(null);
     private options$ = new BehaviorSubject<NgDateRangePickerOptions>(getOptions());
     private selectedRange$ = new BehaviorSubject<NgDateRange>(this.options$.getValue().initialDateRange);
     private currentCalendarMonth$ = new BehaviorSubject<Date>(new Date());
@@ -60,6 +60,24 @@ export class NgDaterangepickerService {
         return this.calendar$;
     }
 
+    public getCalendarStatus(): Observable<null | 'from' | 'to'> {
+        return this.opened$.asObservable();
+    }
+
+    public closeCalendar(): void {
+        this.opened$.next(null);
+    }
+
+    public toggleCalendar(selection: 'from' | 'to' | 'opposed'): void {
+        if (this.opened$.getValue() === selection) {
+            return this.closeCalendar();
+        } else if (selection === 'opposed') {
+            return this.opened$.next(this.opened$.getValue() === 'from' ? 'to' : 'from');
+        }
+
+        this.opened$.next(selection);
+    }
+
     private generateCalendar(month: Date, range: NgDateRange): CalendarData {
         return {
             prevMonth: subMonths(month, 1),
@@ -69,23 +87,21 @@ export class NgDaterangepickerService {
         };
     }
 
-    private generateCalendarDays(month: Date, range: NgDateRange): IDay[] {
+    private generateCalendarDays(month: Date, range: NgDateRange): Day[] {
         const monthStart = startOfMonth(month);
         const start = startOfWeek(monthStart, { weekStartsOn: this.options$.getValue().startOfWeek });
         const end = addDays(start, 6 * 7 - 1);
         const { from, to } = range;
-        return eachDay(start, end).map(date => {;
+        return eachDay(start, end).map(date => {
             return {
                 date,
                 day: getDate(date),
                 weekday: getDay(date),
                 today: isToday(date),
-                firstMonthDay: isFirstDayOfMonth(date),
-                lastMonthDay: isLastDayOfMonth(date),
-                visible: true,
                 from: isSameDay(from, date),
                 to: isSameDay(to, date),
                 isWithinRange: isWithinRange(date, from, to),
+                currentMonth: isSameMonth(date, month),
             };
         });
     }

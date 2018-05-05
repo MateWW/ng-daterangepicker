@@ -41,11 +41,12 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
                                    'is-from': d.from,
                                    'is-to': d.to,
                                    'is-first-weekday': d.weekday === 1,
-                                   'is-last-weekday': d.weekday === 0
+                                   'is-last-weekday': d.weekday === 0,
+                                   'is-not-current-month': !d.currentMonth
                                 }"
-                         (click)="selectRange(d.date)"
+                         (click)="d.currentMonth ? selectDate(d.date) : selectMonth(d.date)"
                     >
-                        <span *ngIf="d.visible" class="day-num" [class.is-active]="d.from || d.to">{{ d.day }}</span>
+                        <span class="day-num" [class.is-active]="d.from || d.to">{{ d.day }}</span>
                     </div>
                 </div>
             </div>
@@ -90,13 +91,17 @@ export class CalendarComponent {
         this.changeMonth.emit(this.calendar.nextMonth);
     }
 
-    public selectRange(date: Date): void {
+    public selectDate(date: Date): void {
         if (this.opened) {
             this.changeRange.emit({
                 [this.opened]: date,
             });
             this.range$.next(null);
         }
+    }
+
+    public selectMonth(date: Date): void {
+        this.changeMonth.emit(date);
     }
 
     public selectDefaultRange(range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly'): void {
