@@ -7,7 +7,7 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     template: `
         <div class="input-section" (click)="clickInput.emit()">
             <span class="label-txt">{{ options.inputNames[titleKey] }}</span>
-            <span class="value-txt">{{ date | date:options.dateFormat }}</span>
+            <span class="value-txt">{{ date | dateFormatter: options.visibleDateFormat }}</span>
             <span class="cal-icon">
               <svg width="94px" height="94px" viewBox="3 3 94 94" version="1.1">
                 <g id="Group" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(3.000000, 3.000000)">

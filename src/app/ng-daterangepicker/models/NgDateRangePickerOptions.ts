@@ -1,4 +1,4 @@
-import { createDateRange, NgDateRange } from './NgDateRange';
+import { createDateRange, NgDateRange, updateDateRange } from './NgDateRange';
 
 export interface NgDateRangePickerOptions {
     theme: 'default' | 'green' | 'teal' | 'cyan' | 'grape' | 'red' | 'gray';
@@ -10,8 +10,9 @@ export interface NgDateRangePickerOptions {
         to: string;
     };
     alignment: 'left' | 'center' | 'right';
-    dateFormat: string;
-    outputFormat: string;
+    visibleDateFormat: string | ((date: Date) => string);
+    inputFormat: (input: any) => NgDateRange;
+    outputFormat: (dateRange: NgDateRange) => any;
     startOfWeek: number;
     initialDateRange: NgDateRange;
 }
@@ -26,10 +27,11 @@ export const defaultOptions: NgDateRangePickerOptions = {
         to: 'End',
     },
     alignment: 'left',
-    dateFormat: 'y-M-d',
-    outputFormat: 'DD/MM/YYYY',
     startOfWeek: 0,
     initialDateRange: createDateRange(new Date(), new Date()),
+    visibleDateFormat: 'DD-MM-YYYY',
+    inputFormat: input => updateDateRange(createDateRange(), input),
+    outputFormat: dateRange => dateRange,
 };
 
 export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): NgDateRangePickerOptions {

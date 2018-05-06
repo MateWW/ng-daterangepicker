@@ -77,10 +77,12 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
         }
     }
 
-    public writeValue(value: string | Partial<NgDateRange>): void {
+    public writeValue(value: any): void {
         if (!value) {
             return;
         }
+
+        this.service.initValue(value);
     }
 
     public registerOnChange(fn: any): void {
@@ -116,7 +118,7 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
 
     public changeRange(date: Partial<NgDateRange>): void {
         this.service.toggleCalendar('opposed');
-        this.service.updateDateRange(date);
+        this.service.updateDateRange(date, this.onChangeCallback);
         this.onTouchedCallback();
     }
 }

@@ -40,8 +40,15 @@ export class NgDaterangepickerService {
         return this.selectedRange$.asObservable();
     }
 
-    public updateDateRange(range: Partial<NgDateRange>): void {
+    public initValue(value: any): void {
+        const range = this.options$.getValue().inputFormat(value);
         this.selectedRange$.next(updateDateRange(this.selectedRange$.getValue(), range));
+    }
+
+    public updateDateRange(range: Partial<NgDateRange>, changeCallBack: (_: any) => void): void {
+        const newRange = updateDateRange(this.selectedRange$.getValue(), range);
+        this.selectedRange$.next(newRange);
+        changeCallBack(newRange);
     }
 
     public setMonth(date: Date): void {

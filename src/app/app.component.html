@@ -4,13 +4,14 @@
       <div class="columns is-multiline">
         <div class="column is-4 is-offset-4">
           <div class="is-fullwidth">
-            <article class="message is-info has-text-centered">
+            <article class="message is-info">
               <div class="message-header">
                 Model binding
                 <button class="delete"></button>
               </div>
               <div class="message-body">
-                Value: {{ value }}
+                  Value:
+                  <pre>{{ value | json }}</pre>
               </div>
             </article>
           </div>

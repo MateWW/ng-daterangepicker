@@ -14,7 +14,7 @@ export function updateDateRange(range: NgDateRange, { from, to }: Partial<NgDate
     };
 }
 
-export function createDateRange(from: Date, to: Date): NgDateRange {
+export function createDateRange(from: Date = new Date(), to: Date = new Date()): NgDateRange {
     return {
         from,
         to,
