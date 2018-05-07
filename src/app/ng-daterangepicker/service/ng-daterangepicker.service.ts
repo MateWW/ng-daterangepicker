@@ -13,8 +13,7 @@ import {
     startOfWeek,
     subMonths,
 } from 'date-fns';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { CalendarData } from '../models/CalendarData';

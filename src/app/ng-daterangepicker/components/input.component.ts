@@ -21,8 +21,8 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputComponent {
-    @Input() public options: NgDateRangePickerOptions;
-    @Input() public date: Date;
-    @Input() public titleKey: string;
+    @Input() public options!: NgDateRangePickerOptions;
+    @Input() public date!: Date;
+    @Input() public titleKey!: string;
     @Output() public clickInput = new EventEmitter();
 }

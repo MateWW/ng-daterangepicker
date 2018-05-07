@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import * as dateFns from 'date-fns';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 
 import { CalendarData } from '../models/CalendarData';
 import { createDateRange, NgDateRange } from '../models/NgDateRange';
@@ -74,9 +74,9 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent {
-    @Input() public options: NgDateRangePickerOptions;
-    @Input() public opened: null | 'from' | 'to';
-    @Input() public calendar: CalendarData;
+    @Input() public options!: NgDateRangePickerOptions;
+    @Input() public opened!: null | 'from' | 'to';
+    @Input() public calendar!: CalendarData;
     @Output() public close = new EventEmitter();
     @Output() public changeMonth = new EventEmitter<Date>();
     @Output() public changeRange = new EventEmitter<Partial<NgDateRange>>();

@@ -53,7 +53,7 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit, OnChanges {
-    @Input() public options: NgDateRangePickerOptions;
+    @Input() public options!: NgDateRangePickerOptions;
 
     public options$ = this.service.getOptions();
     public date$ = this.service.getDateRange();

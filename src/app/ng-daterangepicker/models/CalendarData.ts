@@ -6,3 +6,10 @@ export interface CalendarData {
     nextMonth: Date;
     days: Day[];
 }
+
+export const initialCalendarData: CalendarData = {
+    prevMonth: new Date(),
+    month: new Date(),
+    nextMonth: new Date(),
+    days: [],
+};

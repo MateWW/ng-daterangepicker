@@ -5,11 +5,7 @@
   ],
   "rules": {
     "prettier": true,
-    "import-blacklist": [
-      true,
-      "rxjs",
-      "rxjs/Rx"
-    ],
+    "import-blacklist": [],
     "member-access": [
       true,
       "check-accessor"

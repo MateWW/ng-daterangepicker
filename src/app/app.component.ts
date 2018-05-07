@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRangePickerOptions';
@@ -7,28 +7,15 @@ import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRang
     selector: 'app-root',
     templateUrl: './app.component.html',
 })
-export class AppComponent implements OnInit {
-    public value: string;
-    public options: Partial<NgDateRangePickerOptions>;
+export class AppComponent {
+    public value: string = '';
+    public options: Partial<NgDateRangePickerOptions> = {
+        theme: 'default',
+        range: 'tm',
+        dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        presetNames: ['This Month', 'Last Month', 'This Week', 'Last Week', 'This Year', 'Last Year', 'Start', 'End'],
+        alignment: 'right',
+        startOfWeek: 1,
+    };
     public control = new FormControl('');
-
-    public ngOnInit(): void {
-        this.options = {
-            theme: 'default',
-            range: 'tm',
-            dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            presetNames: [
-                'This Month',
-                'Last Month',
-                'This Week',
-                'Last Week',
-                'This Year',
-                'Last Year',
-                'Start',
-                'End',
-            ],
-            alignment: 'right',
-            startOfWeek: 1,
-        };
-    }
 }
