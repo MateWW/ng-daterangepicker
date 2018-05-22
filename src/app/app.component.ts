@@ -10,10 +10,7 @@ import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRang
 export class AppComponent {
     public value: string = '';
     public options: Partial<NgDateRangePickerOptions> = {
-        theme: 'default',
-        range: 'tm',
         dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        presetNames: ['This Month', 'Last Month', 'This Week', 'Last Week', 'This Year', 'Last Year', 'Start', 'End'],
         alignment: 'right',
         startOfWeek: 1,
     };

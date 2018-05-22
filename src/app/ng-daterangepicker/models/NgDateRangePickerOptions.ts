@@ -1,46 +1,48 @@
 import { createDateRange, NgDateRange, updateDateRange } from './NgDateRange';
+import { NgDaterangeShortCut, NgDaterangeShortcutEntity, parseDaterangeShortCutList } from './RangeShortcut';
 
 export interface NgDateRangePickerOptions {
-    theme: 'default' | 'green' | 'teal' | 'cyan' | 'grape' | 'red' | 'gray';
-    range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly';
+    initialDateRange: NgDateRange;
+    inputFormat: (input: any) => NgDateRange;
+    outputFormat: (dateRange: NgDateRange) => any;
+    startOfWeek: number;
     dayNames: string[];
-    presetNames: string[];
     inputNames: {
         from: string;
         to: string;
     };
-    alignment: 'left' | 'center' | 'right';
     visibleDateFormat: string | ((date: Date) => string);
-    inputFormat: (input: any) => NgDateRange;
-    outputFormat: (dateRange: NgDateRange) => any;
-    startOfWeek: number;
-    initialDateRange: NgDateRange;
+    alignment: 'left' | 'center' | 'right';
+    shortCuts: NgDaterangeShortCut[];
+}
+
+export interface InsideOptions extends NgDateRangePickerOptions {
+    shortCuts: NgDaterangeShortcutEntity[];
 }
 
 export const defaultOptions: NgDateRangePickerOptions = {
-    theme: 'default',
-    range: 'tm',
+    initialDateRange: createDateRange(new Date(), new Date()),
+    inputFormat: input => updateDateRange(createDateRange(), input),
+    outputFormat: dateRange => dateRange,
+    startOfWeek: 0,
     dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    presetNames: ['This Month', 'Last Month', 'This Week', 'Last Week', 'This Year', 'Last Year'],
     inputNames: {
         from: 'Start',
         to: 'End',
     },
-    alignment: 'left',
-    startOfWeek: 0,
-    initialDateRange: createDateRange(new Date(), new Date()),
     visibleDateFormat: 'DD-MM-YYYY',
-    inputFormat: input => updateDateRange(createDateRange(), input),
-    outputFormat: dateRange => dateRange,
+    alignment: 'left',
+    shortCuts: ['thisMonth', 'lastMonth', 'lastWeek', 'thisWeek', 'thisYear', 'lastYear'],
 };
 
-export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): NgDateRangePickerOptions {
+export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): InsideOptions {
     return {
         ...defaultOptions,
         ...partial,
+        shortCuts: parseDaterangeShortCutList(partial.shortCuts || defaultOptions.shortCuts),
         inputNames: {
             ...defaultOptions.inputNames,
-            ...(partial.inputNames ? partial.inputNames : {}),
+            ...(partial.inputNames || {}),
         },
     };
 }

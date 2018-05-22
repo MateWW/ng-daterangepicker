@@ -19,12 +19,12 @@ import { distinctUntilChanged, mergeMap, shareReplay } from 'rxjs/operators';
 import { CalendarData } from '../models/CalendarData';
 import { Day } from '../models/Day';
 import { NgDateRange, updateDateRange } from '../models/NgDateRange';
-import { getOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { getOptions, InsideOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 
 @Injectable()
 export class NgDaterangepickerService {
     private opened$ = new BehaviorSubject<null | 'from' | 'to'>(null);
-    private options$ = new BehaviorSubject<NgDateRangePickerOptions>(getOptions());
+    private options$ = new BehaviorSubject<InsideOptions>(getOptions());
     private selectedRange$ = new BehaviorSubject<NgDateRange>(this.options$.getValue().initialDateRange);
     private currentCalendarMonth$ = new BehaviorSubject<Date>(new Date());
     private calendar$ = this.currentCalendarMonth$.pipe(
@@ -54,7 +54,7 @@ export class NgDaterangepickerService {
         this.currentCalendarMonth$.next(date);
     }
 
-    public getOptions(): Observable<NgDateRangePickerOptions> {
+    public getOptions(): Observable<InsideOptions> {
         return this.options$.asObservable();
     }
 
@@ -81,7 +81,7 @@ export class NgDaterangepickerService {
             return this.opened$.next(this.opened$.getValue() === 'from' ? 'to' : 'from');
         }
 
-        this.opened$.next(selection);
+        return this.opened$.next(selection);
     }
 
     private generateCalendar(month: Date, range: NgDateRange): CalendarData {

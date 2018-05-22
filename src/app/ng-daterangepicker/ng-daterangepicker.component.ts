@@ -44,6 +44,7 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
                     (close)="closeCalendar()"
                     (changeMonth)="changeMonth($event)"
                     (changeRange)="changeRange($event)"
+                    (applyShortcut)="changeRange($event, false)"
             ></ng-datepicker-calendar>
         </div>
 
@@ -116,8 +117,10 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
         this.service.setMonth(date);
     }
 
-    public changeRange(date: Partial<NgDateRange>): void {
-        this.service.toggleCalendar('opposed');
+    public changeRange(date: Partial<NgDateRange>, toggleCalendar: boolean = true): void {
+        if (toggleCalendar) {
+            this.service.toggleCalendar('opposed');
+        }
         this.service.updateDateRange(date, this.onChangeCallback);
         this.onTouchedCallback();
     }

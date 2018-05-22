@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import * as dateFns from 'date-fns';
 import { BehaviorSubject } from 'rxjs';
 
 import { CalendarData } from '../models/CalendarData';
-import { createDateRange, NgDateRange } from '../models/NgDateRange';
-import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { NgDateRange } from '../models/NgDateRange';
+import { InsideOptions } from '../models/NgDateRangePickerOptions';
+import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
 
 @Component({
     selector: 'ng-datepicker-calendar',
@@ -52,12 +52,15 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
             </div>
             <div class="side-container">
                 <div class="side-container-buttons">
-                    <button type="button" class="side-button" (click)="selectDefaultRange('tm')" [class.is-active]="(range$ | async) === 'tm'">{{options.presetNames[0]}}</button>
-                    <button type="button" class="side-button" (click)="selectDefaultRange('lm')" [class.is-active]="(range$ | async) === 'lm'">{{options.presetNames[1]}}</button>
-                    <button type="button" class="side-button" (click)="selectDefaultRange('tw')" [class.is-active]="(range$ | async) === 'tw'">{{options.presetNames[2]}}</button>
-                    <button type="button" class="side-button" (click)="selectDefaultRange('lw')" [class.is-active]="(range$ | async) === 'lw'">{{options.presetNames[3]}}</button>
-                    <button type="button" class="side-button" (click)="selectDefaultRange('ty')" [class.is-active]="(range$ | async) === 'ty'">{{options.presetNames[4]}}</button>
-                    <button type="button" class="side-button" (click)="selectDefaultRange('ly')" [class.is-active]="(range$ | async) === 'ly'">{{options.presetNames[5]}}</button>
+                    <button
+                            *ngFor="let item of options.shortCuts"
+                            type="button"
+                            class="side-button"
+                            [class.is-active]="(range$ | async) === item.title"
+                            (click)="selectDefaultRange(item)"
+                    >
+                        {{item.title}}
+                    </button>
                 </div>
                 <span class="close-icon" (click)="close.emit()">
                         <svg width="20px" height="20px" viewBox="47 44 20 20" version="1.1">
@@ -74,14 +77,15 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent {
-    @Input() public options!: NgDateRangePickerOptions;
+    @Input() public options!: InsideOptions;
     @Input() public opened!: null | 'from' | 'to';
     @Input() public calendar!: CalendarData;
     @Output() public close = new EventEmitter();
     @Output() public changeMonth = new EventEmitter<Date>();
     @Output() public changeRange = new EventEmitter<Partial<NgDateRange>>();
+    @Output() public applyShortcut = new EventEmitter<Partial<NgDateRange>>();
 
-    public range$ = new BehaviorSubject<'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly' | null>(null);
+    public range$ = new BehaviorSubject<string | null>(null);
 
     public prevMonth(): void {
         this.changeMonth.emit(this.calendar.prevMonth);
@@ -104,38 +108,10 @@ export class CalendarComponent {
         this.changeMonth.emit(date);
     }
 
-    public selectDefaultRange(range: 'tm' | 'lm' | 'lw' | 'tw' | 'ty' | 'ly'): void {
+    public selectDefaultRange(range: NgDaterangeShortcutEntity): void {
         const today = new Date();
-        this.changeMonth.emit(today);
-        this.range$.next(range);
-
-        switch (range) {
-            case 'tm':
-                return this.changeRange.emit(createDateRange(dateFns.startOfMonth(today), dateFns.endOfMonth(today)));
-
-            case 'lm':
-                const prevMonth = dateFns.subMonths(today, 1);
-                return this.changeRange.emit(
-                    createDateRange(dateFns.startOfMonth(prevMonth), dateFns.endOfMonth(prevMonth)),
-                );
-
-            case 'lw':
-                const prevWeek = dateFns.subWeeks(today, 1);
-                return this.changeRange.emit(
-                    createDateRange(dateFns.startOfWeek(prevWeek), dateFns.endOfWeek(prevWeek)),
-                );
-
-            case 'tw':
-                return this.changeRange.emit(createDateRange(dateFns.startOfWeek(today), dateFns.endOfWeek(today)));
-
-            case 'ty':
-                return this.changeRange.emit(createDateRange(dateFns.startOfYear(today), dateFns.endOfYear(today)));
-
-            default:
-                const lastYear = dateFns.subYears(today, 1);
-                return this.changeRange.emit(
-                    createDateRange(dateFns.startOfYear(lastYear), dateFns.endOfYear(lastYear)),
-                );
-        }
+        this.changeMonth.emit(range.visibleMonth(this.opened || 'from'));
+        this.applyShortcut.emit(range.range(today));
+        this.range$.next(range.title);
     }
 }
