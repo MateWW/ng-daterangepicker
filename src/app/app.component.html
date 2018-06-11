@@ -10,7 +10,7 @@
                 <button class="delete"></button>
               </div>
               <div class="message-body">
-                  Value:
+                  Value NgModel:
                   <pre>{{ value | json }}</pre>
               </div>
             </article>
@@ -23,25 +23,25 @@
                 <label class="label">Theme</label>
               </div>
               <span class="select">
-                <select [(ngModel)]="options.theme">
-                  <option>default</option>
-                  <option>green</option>
-                  <option>teal</option>
-                  <option>cyan</option>
-                  <option>grape</option>
-                  <option>red</option>
-                  <option>gray</option>
+                <select [(ngModel)]="theme">
+                  <option [ngValue]="''">default</option>
+                  <option [ngValue]="'theme-green'">green</option>
+                  <option [ngValue]="'theme-red'">red</option>
+                  <option [ngValue]="'theme-gray'">gray</option>
+                  <option [ngValue]="'theme-teal'">teal</option>
+                  <option [ngValue]="'theme-cyan'">cyan</option>
+                  <option [ngValue]="'theme-grape'">grape</option>
                 </select>
               </span>
             </div>
           </div>
         </div>
-        <div class="column is-4 is-offset-4">
+        <div class="column is-4 is-offset-4" [ngClass]="theme">
           <div class="is-fullwidth">
             <ng-daterangepicker [(ngModel)]="value" [options]="options"></ng-daterangepicker>
           </div>
         </div>
-        <div class="column is-4 is-offset-4">
+        <div class="column is-4 is-offset-4" [ngClass]="theme">
           <div class="is-fullwidth">
             <ng-daterangepicker [formControl]="control" [options]="options"></ng-daterangepicker>
           </div>

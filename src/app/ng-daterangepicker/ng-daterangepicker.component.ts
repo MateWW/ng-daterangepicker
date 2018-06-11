@@ -24,7 +24,10 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
 @Component({
     selector: 'ng-daterangepicker',
     template: `
-        <div class="ng-daterangepicker">
+        <div
+            class="ng-daterangepicker"
+            [class.is-active]="opened$ | async"
+        >
             <ng-datepicker-input
                 [date]="dateFrom$ | async"
                 [options]="options$ | async"

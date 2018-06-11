@@ -6,9 +6,11 @@ import { NgDateRangePickerOptions } from './ng-daterangepicker/models/NgDateRang
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
+    styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
     public value: string = '';
+    public theme: string = '';
     public options: Partial<NgDateRangePickerOptions> = {
         dayNames: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         alignment: 'right',
