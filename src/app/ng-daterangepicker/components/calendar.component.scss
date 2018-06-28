@@ -159,7 +159,7 @@
     border-bottom-right-radius: 50%;
   }
 
-  &.is-not-current-month {
+  &.is-not-current-month, &.is-out-of-limit-range {
     color: $grey;
 
     .day-num:hover {
@@ -207,6 +207,10 @@
   width: 12px;
   height: 20px;
   cursor: pointer;
+
+  &.disabled {
+    opacity: .3;
+  }
 }
 
 .control-title {

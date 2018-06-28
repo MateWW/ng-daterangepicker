@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import {
     addDays,
     addMonths,
+    areRangesOverlapping,
     eachDay,
     getDate,
     getDay,
+    isAfter,
+    isBefore,
     isSameDay,
     isSameMonth,
     isToday,
@@ -13,53 +16,32 @@ import {
     startOfWeek,
     subMonths,
 } from 'date-fns';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, mergeMap, shareReplay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { CalendarData } from '../models/CalendarData';
 import { Day } from '../models/Day';
-import { NgDateRange, updateDateRange } from '../models/NgDateRange';
-import { getOptions, InsideOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { NgDateRange } from '../models/NgDateRange';
+import { InsideOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
+import { DatePickerStore } from './store';
 
 @Injectable()
 export class NgDaterangepickerService {
-    private opened$ = new BehaviorSubject<null | 'from' | 'to'>(null);
-    private options$ = new BehaviorSubject<InsideOptions>(getOptions());
-    private selectedRange$ = new BehaviorSubject<NgDateRange>(this.options$.getValue().initialDateRange);
-    private currentCalendarMonth$ = new BehaviorSubject<Date>(new Date());
-    private calendar$ = this.currentCalendarMonth$.pipe(
-        mergeMap(
-            () => this.selectedRange$.pipe(distinctUntilChanged()),
-            (date, range) => this.generateCalendar(date, range),
-        ),
-        shareReplay(1),
-    );
+    private store = new DatePickerStore();
+    private calendar$ = this.store
+        .getMonth()
+        .pipe(
+            mergeMap(month => this.store.getRange().pipe(map(range => this.generateCalendar(month, range)))),
+            shareReplay(1),
+        );
 
     public getDateRange(): Observable<NgDateRange> {
-        return this.selectedRange$.asObservable();
-    }
-
-    public initValue(value: any): void {
-        const range = this.options$.getValue().inputFormat(value);
-        this.selectedRange$.next(updateDateRange(this.selectedRange$.getValue(), range));
-    }
-
-    public updateDateRange(range: Partial<NgDateRange>, changeCallBack: (_: any) => void): void {
-        const newRange = updateDateRange(this.selectedRange$.getValue(), range);
-        this.selectedRange$.next(newRange);
-        changeCallBack(newRange);
-    }
-
-    public setMonth(date: Date): void {
-        this.currentCalendarMonth$.next(date);
+        return this.store.getRange();
     }
 
     public getOptions(): Observable<InsideOptions> {
-        return this.options$.asObservable();
-    }
-
-    public setOptions(options: NgDateRangePickerOptions): void {
-        this.options$.next(getOptions(options));
+        return this.store.getOptions();
     }
 
     public getCalendar(): Observable<CalendarData> {
@@ -67,35 +49,94 @@ export class NgDaterangepickerService {
     }
 
     public getCalendarStatus(): Observable<null | 'from' | 'to'> {
-        return this.opened$.asObservable();
+        return this.store.getCalendarStatus();
+    }
+
+    public initValue(value: any): void {
+        const range = this.store.getOptionsValue().inputFormat(value);
+        this.store.updateRange(range);
+    }
+
+    public updateDateRange(range: Partial<NgDateRange>): void {
+        this.store.updateRange(range);
+    }
+
+    public setMonth(date: Date): void {
+        this.store.setMonth(date);
+    }
+
+    public setOptions(options: NgDateRangePickerOptions): void {
+        this.store.setOptions(options);
+    }
+
+    public setOnTouched(callback: () => void): void {
+        this.store.setTouchedCallback(callback);
+    }
+
+    public setOnChange(callback: (_: any) => void): void {
+        this.store.setChangeCallback(callback);
     }
 
     public closeCalendar(): void {
-        this.opened$.next(null);
+        this.store.setCalendarStatus(null);
     }
 
-    public toggleCalendar(selection: 'from' | 'to' | 'opposed'): void {
-        if (this.opened$.getValue() === selection) {
+    public toggleCalendar(selection: 'from' | 'to' | null = null, changeMonth: boolean = false): void {
+        const currentStatus = this.store.getCalendarStatusValue();
+        const currentRange = this.store.getRangeValue();
+        if (currentStatus === selection) {
             return this.closeCalendar();
-        } else if (selection === 'opposed') {
-            return this.opened$.next(this.opened$.getValue() === 'from' ? 'to' : 'from');
         }
 
-        return this.opened$.next(selection);
+        const newStatus = selection || (currentStatus === 'from' ? 'to' : 'from');
+
+        if (changeMonth) {
+            this.setMonth(currentRange[newStatus]);
+        }
+        return this.store.setCalendarStatus(newStatus);
+    }
+
+    public applyShortcut(shortcut: NgDaterangeShortcutEntity): void {
+        const range = shortcut.range(new Date());
+        const limitRange = this.store.getOptionsValue().limitRange;
+        if (!limitRange) {
+            return this.updateShortcutRange(shortcut, range);
+        } else if (!areRangesOverlapping(range.from, range.to, limitRange.from, limitRange.to)) {
+            const now = new Date();
+            return this.updateShortcutRange(shortcut, { from: now, to: now });
+        }
+
+        const limitedRange = {
+            from: this.isAfterStartOfLimit(range.from, limitRange) ? range.from : limitRange.from,
+            to: this.isBeforeEndOfLimit(range.to, limitRange) ? range.to : limitRange.to,
+        };
+
+        return this.updateShortcutRange(shortcut, limitedRange);
+    }
+
+    private updateShortcutRange(shortcut: NgDaterangeShortcutEntity, range: NgDateRange): void {
+        const status = this.store.getCalendarStatusValue();
+        if (status) {
+            this.setMonth(shortcut.visibleMonth(status));
+        }
+
+        this.store.updateRange(range);
     }
 
     private generateCalendar(month: Date, range: NgDateRange): CalendarData {
+        const prevMonth = subMonths(month, 1);
+        const nextMonth = addMonths(month, 1);
         return {
-            prevMonth: subMonths(month, 1),
+            prevMonth: this.isDateWithinLimit(prevMonth, true) ? prevMonth : null,
+            nextMonth: this.isDateWithinLimit(nextMonth, true) ? nextMonth : null,
             month,
-            nextMonth: addMonths(month, 1),
             days: this.generateCalendarDays(month, range),
         };
     }
 
     private generateCalendarDays(month: Date, range: NgDateRange): Day[] {
         const monthStart = startOfMonth(month);
-        const start = startOfWeek(monthStart, { weekStartsOn: this.options$.getValue().startOfWeek });
+        const start = startOfWeek(monthStart, { weekStartsOn: this.store.getOptionsValue().startOfWeek });
         const end = addDays(start, 6 * 7 - 1);
         const { from, to } = range;
         return eachDay(start, end).map(date => {
@@ -108,7 +149,37 @@ export class NgDaterangepickerService {
                 to: isSameDay(to, date),
                 isWithinRange: isWithinRange(date, from, to),
                 currentMonth: isSameMonth(date, month),
+                outOfLimitRange: !this.isDateWithinLimit(date),
             };
         });
+    }
+
+    private isDateWithinLimit(date: Date, month: boolean = false): boolean {
+        const limitRange = this.store.getOptionsValue().limitRange;
+        if (!limitRange) {
+            return true;
+        }
+
+        const isTheSameMonth = month && (isSameMonth(date, limitRange.from) || isSameMonth(date, limitRange.to));
+
+        const isAfterDate = isTheSameMonth || this.isAfterStartOfLimit(date, limitRange);
+        const isBeforeDate = isTheSameMonth || this.isBeforeEndOfLimit(date, limitRange);
+        return isAfterDate && isBeforeDate;
+    }
+
+    private isAfterStartOfLimit(date: Date, limitRange: NgDateRange | null): boolean {
+        if (!limitRange) {
+            return true;
+        }
+
+        return !limitRange.from || isAfter(date, limitRange.from);
+    }
+
+    private isBeforeEndOfLimit(date: Date, limitRange: NgDateRange | null): boolean {
+        if (!limitRange) {
+            return true;
+        }
+
+        return !limitRange.to || isBefore(date, limitRange.to);
     }
 }

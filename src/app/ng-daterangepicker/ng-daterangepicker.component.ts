@@ -9,7 +9,7 @@ import {
     OnInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { NgDateRange } from './models/NgDateRange';
 import { NgDateRangePickerOptions } from './models/NgDateRangePickerOptions';
@@ -47,7 +47,7 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
                     (close)="closeCalendar()"
                     (changeMonth)="changeMonth($event)"
                     (changeRange)="changeRange($event)"
-                    (applyShortcut)="changeRange($event, false)"
+                    (applyShortcut)="service.applyShortcut($event)"
             ></ng-datepicker-calendar>
         </div>
 
@@ -65,11 +65,6 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
     public dateTo$ = this.date$.pipe(map(({ to }) => to));
     public opened$ = this.service.getCalendarStatus();
     public calendar$ = this.service.getCalendar();
-
-    /* tslint:disable:no-empty */
-    private onTouchedCallback: () => void = () => {};
-    private onChangeCallback: (_: any) => void = () => {};
-    /* tslint:enable:no-empty */
 
     constructor(private elementRef: ElementRef, public service: NgDaterangepickerService) {}
 
@@ -90,11 +85,11 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
     }
 
     public registerOnChange(fn: any): void {
-        this.onChangeCallback = fn;
+        this.service.setOnChange(fn);
     }
 
     public registerOnTouched(fn: any): void {
-        this.onTouchedCallback = fn;
+        this.service.setOnTouched(fn);
     }
 
     public ngOnInit(): void {
@@ -106,10 +101,7 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
     }
 
     public toggleCalendar(selection: 'from' | 'to'): void {
-        this.date$.pipe(first()).subscribe(dateRange => {
-            this.service.toggleCalendar(selection);
-            this.service.setMonth(dateRange[selection]);
-        });
+        this.service.toggleCalendar(selection, true);
     }
 
     public closeCalendar(): void {
@@ -122,9 +114,8 @@ export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit,
 
     public changeRange(date: Partial<NgDateRange>, toggleCalendar: boolean = true): void {
         if (toggleCalendar) {
-            this.service.toggleCalendar('opposed');
+            this.service.toggleCalendar();
         }
-        this.service.updateDateRange(date, this.onChangeCallback);
-        this.onTouchedCallback();
+        this.service.updateDateRange(date);
     }
 }

@@ -14,6 +14,7 @@ export interface NgDateRangePickerOptions {
     visibleDateFormat: string | ((date: Date) => string);
     alignment: 'left' | 'center' | 'right';
     shortCuts: NgDaterangeShortCut[];
+    limitRange?: NgDateRange | null;
 }
 
 export interface InsideOptions extends NgDateRangePickerOptions {
@@ -33,6 +34,7 @@ export const defaultOptions: NgDateRangePickerOptions = {
     visibleDateFormat: 'DD-MM-YYYY',
     alignment: 'left',
     shortCuts: ['thisMonth', 'lastMonth', 'lastWeek', 'thisWeek', 'thisYear', 'lastYear'],
+    limitRange: null,
 };
 
 export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): InsideOptions {

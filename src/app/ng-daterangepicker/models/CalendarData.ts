@@ -1,9 +1,9 @@
 import { Day } from './Day';
 
 export interface CalendarData {
-    prevMonth: Date;
+    prevMonth: Date | null;
     month: Date;
-    nextMonth: Date;
+    nextMonth: Date | null;
     days: Day[];
 }
 

@@ -7,4 +7,5 @@ export interface Day {
     to: boolean;
     isWithinRange: boolean;
     currentMonth: boolean;
+    outOfLimitRange: boolean;
 }

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { BehaviorSubject } from 'rxjs';
 
 import { CalendarData } from '../models/CalendarData';
+import { Day } from '../models/Day';
 import { NgDateRange } from '../models/NgDateRange';
 import { InsideOptions } from '../models/NgDateRangePickerOptions';
 import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
@@ -18,13 +19,13 @@ import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
                 }">
             <div class="calendar-container">
                 <div class="controls">
-                        <span class="control-icon" (click)="prevMonth()">
+                        <span class="control-icon" (click)="prevMonth()" [class.disabled]="!calendar.prevMonth">
                           <svg width="13px" height="20px" viewBox="0 44 13 20" version="1.1">
                             <path d="M11.7062895,64 C11.6273879,64 11.5477012,63.9744846 11.480576,63.921491 L0.139160349,54.9910879 C0.0551556781,54.9247477 0.00451734852,54.8250413 0.000199351429,54.7174839 C-0.00333355528,54.6107116 0.0402389608,54.5074722 0.119140544,54.4356364 L11.4605562,44.095211 C11.6093308,43.9589979 11.8401474,43.9707742 11.9751829,44.1187637 C12.1110036,44.2675384 12.1004048,44.4983549 11.9516302,44.6333905 L0.928176181,54.6841175 L11.9323955,63.3491601 C12.0905912,63.4735969 12.1176768,63.7028433 11.9928475,63.861039 C11.9206191,63.9521095 11.8138469,64 11.7062895,64 Z" id="Shape" stroke="none" fill="#000000" fill-rule="nonzero"></path>
                           </svg>
                         </span>
                     <span class="control-title">{{ calendar.month | date:'MMMM y' }}</span>
-                    <span class="control-icon" (click)="nextMonth()">
+                    <span class="control-icon" (click)="nextMonth()" [class.disabled]="!calendar.nextMonth">
                           <svg width="13px" height="20px" viewBox="21 44 13 20">
                             <path d="M32.7062895,64 C32.6273879,64 32.5477012,63.9744846 32.480576,63.921491 L21.1391603,54.9910879 C21.0551557,54.9247477 21.0045173,54.8250413 21.0001994,54.7174839 C20.9966664,54.6107116 21.040239,54.5074722 21.1191405,54.4356364 L32.4605562,44.095211 C32.6093308,43.9589979 32.8401474,43.9707742 32.9751829,44.1187637 C33.1110036,44.2675384 33.1004048,44.4983549 32.9516302,44.6333905 L21.9281762,54.6841175 L32.9323955,63.3491601 C33.0905912,63.4735969 33.1176768,63.7028433 32.9928475,63.861039 C32.9206191,63.9521095 32.8138469,64 32.7062895,64 Z" id="Shape" stroke="none" fill="#000000" fill-rule="nonzero" transform="translate(27.035642, 54.000000) scale(-1, 1) translate(-27.035642, -54.000000) "></path>
                           </svg>
@@ -42,9 +43,10 @@ import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
                                    'is-to': d.to,
                                    'is-first-weekday': d.weekday === 1,
                                    'is-last-weekday': d.weekday === 0,
-                                   'is-not-current-month': !d.currentMonth
+                                   'is-not-current-month': !d.currentMonth,
+                                   'is-out-of-limit-range': d.outOfLimitRange
                                 }"
-                         (click)="d.currentMonth ? selectDate(d.date) : selectMonth(d.date)"
+                         (click)="clickDay(d)"
                     >
                         <span class="day-num" [class.is-active]="d.from || d.to">{{ d.day }}</span>
                     </div>
@@ -83,16 +85,32 @@ export class CalendarComponent {
     @Output() public close = new EventEmitter();
     @Output() public changeMonth = new EventEmitter<Date>();
     @Output() public changeRange = new EventEmitter<Partial<NgDateRange>>();
-    @Output() public applyShortcut = new EventEmitter<Partial<NgDateRange>>();
+    @Output() public applyShortcut = new EventEmitter<NgDaterangeShortcutEntity>();
 
     public range$ = new BehaviorSubject<string | null>(null);
 
     public prevMonth(): void {
-        this.changeMonth.emit(this.calendar.prevMonth);
+        if (this.calendar.prevMonth) {
+            this.changeMonth.emit(this.calendar.prevMonth);
+        }
     }
 
     public nextMonth(): void {
-        this.changeMonth.emit(this.calendar.nextMonth);
+        if (this.calendar.nextMonth) {
+            this.changeMonth.emit(this.calendar.nextMonth);
+        }
+    }
+
+    public clickDay(day: Day): void {
+        if (day.outOfLimitRange) {
+            return;
+        }
+
+        if (day.currentMonth) {
+            return this.selectDate(day.date);
+        }
+
+        return this.selectMonth(day.date);
     }
 
     public selectDate(date: Date): void {
@@ -109,9 +127,7 @@ export class CalendarComponent {
     }
 
     public selectDefaultRange(range: NgDaterangeShortcutEntity): void {
-        const today = new Date();
-        this.changeMonth.emit(range.visibleMonth(this.opened || 'from'));
-        this.applyShortcut.emit(range.range(today));
+        this.applyShortcut.emit(range);
         this.range$.next(range.title);
     }
 }
