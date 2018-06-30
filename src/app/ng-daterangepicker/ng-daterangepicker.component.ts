@@ -58,12 +58,12 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
 })
 export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit, OnChanges {
     @Input() public options!: NgDateRangePickerOptions;
-
-    public options$ = this.service.getOptions();
-    public date$ = this.service.getDateRange();
-    public dateFrom$ = this.date$.pipe(map(({ from }) => from));
-    public dateTo$ = this.date$.pipe(map(({ to }) => to));
-    public opened$ = this.service.getCalendarStatus();
+    public store = this.service.getStore();
+    public options$ = this.store.options;
+    public dateRange$ = this.store.range;
+    public dateFrom$ = this.dateRange$.pipe(map(({ from }) => from));
+    public dateTo$ = this.dateRange$.pipe(map(({ to }) => to));
+    public opened$ = this.store.status;
     public calendar$ = this.service.getCalendar();
 
     constructor(private elementRef: ElementRef, public service: NgDaterangepickerService) {}

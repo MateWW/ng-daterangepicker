@@ -19,6 +19,7 @@ export interface NgDateRangePickerOptions {
 
 export interface InsideOptions extends NgDateRangePickerOptions {
     shortCuts: NgDaterangeShortcutEntity[];
+    limitRange: NgDateRange | null;
 }
 
 export const defaultOptions: NgDateRangePickerOptions = {
@@ -38,13 +39,18 @@ export const defaultOptions: NgDateRangePickerOptions = {
 };
 
 export function getOptions(partial: Partial<NgDateRangePickerOptions> = {}): InsideOptions {
-    return {
+    const options = {
         ...defaultOptions,
         ...partial,
-        shortCuts: parseDaterangeShortCutList(partial.shortCuts || defaultOptions.shortCuts),
+    };
+    const { shortCuts, ...insideOptions } = options;
+    return {
+        ...insideOptions,
+        shortCuts: parseDaterangeShortCutList(shortCuts),
         inputNames: {
             ...defaultOptions.inputNames,
             ...(partial.inputNames || {}),
         },
+        limitRange: partial.limitRange || null,
     };
 }

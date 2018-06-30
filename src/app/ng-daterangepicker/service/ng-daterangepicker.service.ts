@@ -2,12 +2,9 @@ import { Injectable } from '@angular/core';
 import {
     addDays,
     addMonths,
-    areRangesOverlapping,
     eachDay,
     getDate,
     getDay,
-    isAfter,
-    isBefore,
     isSameDay,
     isSameMonth,
     isToday,
@@ -19,12 +16,17 @@ import {
 import { Observable } from 'rxjs';
 import { map, mergeMap, shareReplay } from 'rxjs/operators';
 
+import { cutRangeInsideOfLimit } from '../helpers/cutRangeInsideOfLimit';
+import { getLimitedMonth } from '../helpers/getLimitedMonth';
+import { isDateWithinLimit } from '../helpers/isDateWithinLimit';
+import { isMonthWithinLimit } from '../helpers/isMonthWithinLimit';
+
 import { CalendarData } from '../models/CalendarData';
 import { Day } from '../models/Day';
-import { NgDateRange } from '../models/NgDateRange';
-import { InsideOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { fixDateRange, NgDateRange } from '../models/NgDateRange';
+import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
-import { DatePickerStore } from './store';
+import { DatePickerStore, StoreState } from './store';
 
 @Injectable()
 export class NgDaterangepickerService {
@@ -36,20 +38,12 @@ export class NgDaterangepickerService {
             shareReplay(1),
         );
 
-    public getDateRange(): Observable<NgDateRange> {
-        return this.store.getRange();
-    }
-
-    public getOptions(): Observable<InsideOptions> {
-        return this.store.getOptions();
+    public getStore(): StoreState {
+        return this.store.getStore();
     }
 
     public getCalendar(): Observable<CalendarData> {
         return this.calendar$;
-    }
-
-    public getCalendarStatus(): Observable<null | 'from' | 'to'> {
-        return this.store.getCalendarStatus();
     }
 
     public initValue(value: any): void {
@@ -97,27 +91,18 @@ export class NgDaterangepickerService {
     }
 
     public applyShortcut(shortcut: NgDaterangeShortcutEntity): void {
-        const range = shortcut.range(new Date());
+        const range = fixDateRange(shortcut.range(new Date()));
         const limitRange = this.store.getOptionsValue().limitRange;
-        if (!limitRange) {
-            return this.updateShortcutRange(shortcut, range);
-        } else if (!areRangesOverlapping(range.from, range.to, limitRange.from, limitRange.to)) {
-            const now = new Date();
-            return this.updateShortcutRange(shortcut, { from: now, to: now });
-        }
-
-        const limitedRange = {
-            from: this.isAfterStartOfLimit(range.from, limitRange) ? range.from : limitRange.from,
-            to: this.isBeforeEndOfLimit(range.to, limitRange) ? range.to : limitRange.to,
-        };
-
-        return this.updateShortcutRange(shortcut, limitedRange);
+        const now = new Date();
+        const limitedRange = cutRangeInsideOfLimit(range, limitRange) || { from: now, to: now };
+        this.updateShortcutRange(shortcut, limitedRange);
     }
 
     private updateShortcutRange(shortcut: NgDaterangeShortcutEntity, range: NgDateRange): void {
         const status = this.store.getCalendarStatusValue();
         if (status) {
-            this.setMonth(shortcut.visibleMonth(status));
+            const limitRange = this.store.getOptionsValue().limitRange;
+            this.setMonth(getLimitedMonth(shortcut.visibleMonth(status), limitRange));
         }
 
         this.store.updateRange(range);
@@ -126,9 +111,10 @@ export class NgDaterangepickerService {
     private generateCalendar(month: Date, range: NgDateRange): CalendarData {
         const prevMonth = subMonths(month, 1);
         const nextMonth = addMonths(month, 1);
+        const limit = this.store.getOptionsValue().limitRange;
         return {
-            prevMonth: this.isDateWithinLimit(prevMonth, true) ? prevMonth : null,
-            nextMonth: this.isDateWithinLimit(nextMonth, true) ? nextMonth : null,
+            prevMonth: isMonthWithinLimit(prevMonth, limit),
+            nextMonth: isMonthWithinLimit(nextMonth, limit),
             month,
             days: this.generateCalendarDays(month, range),
         };
@@ -139,6 +125,7 @@ export class NgDaterangepickerService {
         const start = startOfWeek(monthStart, { weekStartsOn: this.store.getOptionsValue().startOfWeek });
         const end = addDays(start, 6 * 7 - 1);
         const { from, to } = range;
+        const limit = this.store.getOptionsValue().limitRange;
         return eachDay(start, end).map(date => {
             return {
                 date,
@@ -149,37 +136,8 @@ export class NgDaterangepickerService {
                 to: isSameDay(to, date),
                 isWithinRange: isWithinRange(date, from, to),
                 currentMonth: isSameMonth(date, month),
-                outOfLimitRange: !this.isDateWithinLimit(date),
+                outOfLimitRange: !isDateWithinLimit(date, limit),
             };
         });
-    }
-
-    private isDateWithinLimit(date: Date, month: boolean = false): boolean {
-        const limitRange = this.store.getOptionsValue().limitRange;
-        if (!limitRange) {
-            return true;
-        }
-
-        const isTheSameMonth = month && (isSameMonth(date, limitRange.from) || isSameMonth(date, limitRange.to));
-
-        const isAfterDate = isTheSameMonth || this.isAfterStartOfLimit(date, limitRange);
-        const isBeforeDate = isTheSameMonth || this.isBeforeEndOfLimit(date, limitRange);
-        return isAfterDate && isBeforeDate;
-    }
-
-    private isAfterStartOfLimit(date: Date, limitRange: NgDateRange | null): boolean {
-        if (!limitRange) {
-            return true;
-        }
-
-        return !limitRange.from || isAfter(date, limitRange.from);
-    }
-
-    private isBeforeEndOfLimit(date: Date, limitRange: NgDateRange | null): boolean {
-        if (!limitRange) {
-            return true;
-        }
-
-        return !limitRange.to || isBefore(date, limitRange.to);
     }
 }

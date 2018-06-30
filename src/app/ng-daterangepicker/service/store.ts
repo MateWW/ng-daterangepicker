@@ -4,6 +4,13 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import { NgDateRange, updateDateRange } from '../models/NgDateRange';
 import { getOptions, InsideOptions, NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
 
+export interface StoreState {
+    status: Observable<null | 'from' | 'to'>;
+    options: Observable<InsideOptions>;
+    range: Observable<NgDateRange>;
+    currentCalendarMonth: Observable<Date>;
+}
+
 export class DatePickerStore {
     private opened$ = new BehaviorSubject<null | 'from' | 'to'>(null);
     private options$ = new BehaviorSubject<InsideOptions>(getOptions());
@@ -18,6 +25,15 @@ export class DatePickerStore {
         if (options) {
             this.setOptions(options);
         }
+    }
+
+    public getStore(): StoreState {
+        return {
+            status: this.getCalendarStatus(),
+            options: this.getOptions(),
+            range: this.getRange(),
+            currentCalendarMonth: this.getMonth(),
+        };
     }
 
     public setOptions(options: NgDateRangePickerOptions): void {

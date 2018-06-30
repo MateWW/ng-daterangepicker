@@ -14,6 +14,10 @@ export function updateDateRange(range: NgDateRange, { from, to }: Partial<NgDate
     };
 }
 
+export function fixDateRange(range: NgDateRange): NgDateRange {
+    return updateDateRange(range, {});
+}
+
 export function createDateRange(from: Date = new Date(), to: Date = new Date()): NgDateRange {
     return {
         from,
