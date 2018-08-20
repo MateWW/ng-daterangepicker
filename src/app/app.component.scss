@@ -1,6 +1,31 @@
 @import "ng-datepicker-colors";
 
-.theme-green ng-daterangepicker::ng-deep {
+.container {
+  width: 320px;
+  margin: 0 auto;
+
+}
+
+.control-panel {
+  margin-bottom: 40px;
+  border: 1px solid #cccccc;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.select-control{
+  width: 100%;
+}
+
+form {
+  padding: 0 10px 10px;
+  border-color: #cccccc;
+  border-width: 1px 0;
+  border-style: solid;
+  margin: 0 -10px;
+}
+
+ng-daterangepicker.theme-green::ng-deep {
   &.is-active {
     border-color: $cyan;
   }
@@ -57,7 +82,7 @@
   }
 }
 
-.theme-teal ng-daterangepicker::ng-deep {
+ng-daterangepicker.theme-teal::ng-deep {
   &.is-active {
     border-color: $teal;
   }
@@ -114,7 +139,7 @@
   }
 }
 
-.theme-cyan ng-daterangepicker::ng-deep {
+ng-daterangepicker.theme-cyan::ng-deep {
   &.is-active {
     border-color: $cyan;
   }
@@ -171,7 +196,7 @@
   }
 }
 
-.theme-grape ng-daterangepicker::ng-deep {
+ng-daterangepicker.theme-grape::ng-deep {
   &.is-active {
     border-color: $grape;
   }
@@ -228,7 +253,7 @@
   }
 }
 
-.theme-red ng-daterangepicker::ng-deep {
+ng-daterangepicker.theme-red::ng-deep {
   &.is-active {
     border-color: $red;
   }
@@ -285,7 +310,7 @@
   }
 }
 
-.theme-gray ng-daterangepicker::ng-deep {
+ng-daterangepicker.theme-gray::ng-deep {
   &.is-active {
     border-color: $gray;
   }

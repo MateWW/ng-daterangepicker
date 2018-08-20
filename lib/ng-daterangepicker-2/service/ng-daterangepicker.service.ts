@@ -31,12 +31,10 @@ import { DatePickerStore, StoreState } from './store';
 @Injectable()
 export class NgDaterangepickerService {
     private store = new DatePickerStore();
-    private calendar$ = this.store
-        .getMonth()
-        .pipe(
-            mergeMap(month => this.store.getRange().pipe(map(range => this.generateCalendar(month, range)))),
-            shareReplay(1),
-        );
+    private calendar$ = this.store.getMonth().pipe(
+        mergeMap(month => this.store.getRange().pipe(map(range => this.generateCalendar(month, range)))),
+        shareReplay(1),
+    );
 
     public getStore(): StoreState {
         return this.store.getStore();

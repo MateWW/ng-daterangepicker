@@ -9,11 +9,14 @@ import {
     OnInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CalendarData } from './models/CalendarData';
 import { NgDateRange } from './models/NgDateRange';
-import { NgDateRangePickerOptions } from './models/NgDateRangePickerOptions';
+import { InsideOptions, NgDateRangePickerOptions } from './models/NgDateRangePickerOptions';
 import { NgDaterangepickerService } from './service/ng-daterangepicker.service';
+import { StoreState } from './service/store';
 
 export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
     provide: NG_VALUE_ACCESSOR,
@@ -41,13 +44,13 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
                 (clickInput)="toggleCalendar('to')"
             ></ng-datepicker-input>
             <ng-datepicker-calendar
-                    [options]="options$ | async"
-                    [opened]="opened$ | async"
-                    [calendar]="calendar$ | async"
-                    (close)="closeCalendar()"
-                    (changeMonth)="changeMonth($event)"
-                    (changeRange)="changeRange($event)"
-                    (applyShortcut)="service.applyShortcut($event)"
+                [options]="options$ | async"
+                [opened]="opened$ | async"
+                [calendar]="calendar$ | async"
+                (close)="closeCalendar()"
+                (changeMonth)="changeMonth($event)"
+                (changeRange)="changeRange($event)"
+                (applyShortcut)="service.applyShortcut($event)"
             ></ng-datepicker-calendar>
         </div>
 
@@ -58,13 +61,13 @@ export let DATERANGEPICKER_VALUE_ACCESSOR: any = {
 })
 export class NgDateRangePickerComponent implements ControlValueAccessor, OnInit, OnChanges {
     @Input() public options!: NgDateRangePickerOptions;
-    public store = this.service.getStore();
-    public options$ = this.store.options;
-    public dateRange$ = this.store.range;
-    public dateFrom$ = this.dateRange$.pipe(map(({ from }) => from));
-    public dateTo$ = this.dateRange$.pipe(map(({ to }) => to));
-    public opened$ = this.store.status;
-    public calendar$ = this.service.getCalendar();
+    public store: StoreState = this.service.getStore();
+    public options$: Observable<InsideOptions> = this.store.options;
+    public dateRange$: Observable<NgDateRange> = this.store.range;
+    public dateFrom$: Observable<Date> = this.dateRange$.pipe(map(({ from }) => from));
+    public dateTo$: Observable<Date> = this.dateRange$.pipe(map(({ to }) => to));
+    public opened$: Observable<'from' | 'to' | null> = this.store.status;
+    public calendar$: Observable<CalendarData> = this.service.getCalendar();
 
     constructor(private elementRef: ElementRef, public service: NgDaterangepickerService) {}
 

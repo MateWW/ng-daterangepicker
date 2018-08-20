@@ -95,5 +95,4 @@ describe('[Helper] cutRangeInsideOfLimit', () => {
 
         expect(cutRangeInsideOfLimit(withinLimit, limit)).toEqual(expected);
     });
-
 });

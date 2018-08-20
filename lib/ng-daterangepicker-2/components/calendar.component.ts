@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { CalendarData } from '../models/CalendarData';
+import { CalendarData, initialCalendarData } from '../models/CalendarData';
 import { Day } from '../models/Day';
 import { NgDateRange } from '../models/NgDateRange';
-import { InsideOptions } from '../models/NgDateRangePickerOptions';
+import { getOptions, InsideOptions } from '../models/NgDateRangePickerOptions';
 import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
 
 @Component({
@@ -79,9 +79,9 @@ import { NgDaterangeShortcutEntity } from '../models/RangeShortcut';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent {
-    @Input() public options!: InsideOptions;
-    @Input() public opened!: null | 'from' | 'to';
-    @Input() public calendar!: CalendarData;
+    @Input() public options: InsideOptions = getOptions();
+    @Input() public opened: null | 'from' | 'to' = null;
+    @Input() public calendar: CalendarData = initialCalendarData;
     @Output() public close = new EventEmitter();
     @Output() public changeMonth = new EventEmitter<Date>();
     @Output() public changeRange = new EventEmitter<Partial<NgDateRange>>();

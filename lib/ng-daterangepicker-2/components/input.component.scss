@@ -1,4 +1,4 @@
-@import "ng-datepicker-colors";
+@import "../styles/ng-datepicker-colors";
 
 .input-section {
   width: calc(100% / 2);
@@ -10,6 +10,7 @@
   color: $text;
   cursor: pointer;
   position: relative;
+  box-sizing: border-box;
 
   &:first-child {
     border-right: 1px solid $border-light;

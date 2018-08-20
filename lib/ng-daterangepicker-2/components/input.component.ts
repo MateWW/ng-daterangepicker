@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
+import { getOptions, InsideOptions } from '../models/NgDateRangePickerOptions';
 
 @Component({
     selector: 'ng-datepicker-input',
     template: `
         <div class="input-section" (click)="clickInput.emit()">
-            <span class="label-txt">{{ options.inputNames[titleKey] }}</span>
+            <span class="label-txt" *ngIf="titleKey">{{ options.inputNames[titleKey] }}</span>
             <span class="value-txt">{{ date | dateFormatter: options.visibleDateFormat }}</span>
             <span class="cal-icon">
               <svg width="94px" height="94px" viewBox="3 3 94 94" version="1.1">
@@ -21,8 +21,8 @@ import { NgDateRangePickerOptions } from '../models/NgDateRangePickerOptions';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputComponent {
-    @Input() public options!: NgDateRangePickerOptions;
-    @Input() public date!: Date;
-    @Input() public titleKey!: string;
+    @Input() public options: InsideOptions = getOptions();
+    @Input() public date: Date = new Date();
+    @Input() public titleKey: string = '';
     @Output() public clickInput = new EventEmitter();
 }

@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { NgDateRangePickerComponent } from './ng-daterangepicker.component';
-import { NgDaterangepickerService } from './service/ng-daterangepicker.service';
 import { CalendarComponent } from './components/calendar.component';
 import { InputComponent } from './components/input.component';
+import { NgDateRangePickerComponent } from './ng-daterangepicker.component';
 import { PickerDatePipe } from './pipes/picker-date.pipe';
+import { NgDaterangepickerService } from './service/ng-daterangepicker.service';
 
 describe('NgDaterangepickerComponent', () => {
     let component: NgDateRangePickerComponent;
