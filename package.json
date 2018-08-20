@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/ng-packagr/package.schema.json",
   "name": "@matew/ng-daterangepicker-2",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "./dist/bundles/ng-daterangepicker.umd.js",
   "module": "./dist/ng-daterangepicker.es5.js",
   "es2015": "./dist/ng-daterangepicker.js",

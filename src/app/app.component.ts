@@ -21,7 +21,7 @@ export class AppComponent {
             from: new Date(2018, 1, 10),
             to: new Date(),
         },
-        startOfWeek: 1,
+        startOfWeek: 0,
     };
     public theme: string = '';
     public control = new FormControl({
